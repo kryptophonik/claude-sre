@@ -118,7 +118,7 @@ Clone this repository into your Claude Code skills directory:
 mkdir -p ~/.claude/skills
 
 # Clone this repository
-git clone https://github.com/yourusername/Claude-SRE-Skills.git ~/.claude/skills/sre_architect_pack
+git clone [https://github.com/kryptophonik/claude-sre.git] ~/.claude/skills/sre_architect_pack
 ```
 
 ### Project-Local Installation
