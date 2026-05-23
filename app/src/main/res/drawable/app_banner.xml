@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 320x180 TV banner: gradient field with a stylised "U" play mark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+
+    <path
+        android:pathData="M0,0 H320 V180 H0 Z">
+        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt"
+            name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="0"
+                android:endX="320" android:endY="180">
+                <item android:offset="0.0" android:color="#FF120B2E" />
+                <item android:offset="1.0" android:color="#FF2A0E4F" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <path
+        android:pathData="M132,58 v40 a28,28 0 0 0 56,0 v-40 h-16 v40 a12,12 0 0 1 -24,0 v-40 Z"
+        android:fillColor="#FF7C5CFF" />
+    <path
+        android:pathData="M196,70 l30,20 l-30,20 Z"
+        android:fillColor="#FF35E0C0" />
+</vector>

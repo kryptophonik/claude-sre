@@ -1,247 +1,70 @@
-# SRE Architect Skill Pack for Claude Code
+# UnifyTV
 
-**Principal-level Site Reliability Engineering capabilities at your fingertips.**
+Turn your **Jellyfin, Emby and Plex** libraries into always-on, channel-surfable
+**virtual live TV** — for **Android TV**. Like dizqueTV/ErsatzTV, but built as a
+native, leanback-first app with a deliberately polished interface.
 
-A unified SRE skill pack that equips Claude with observability design, SLO creation, alerting strategy, incident response, operational excellence guidance, and hands-on tactical execution.
+UnifyTV imports every connected server into one shared catalog, then lays your
+movies and shows out on a broadcast clock so there is always something "on now".
+Flip through channels, watch the live progress bar tick, and jump in mid-program
+exactly like real TV.
 
----
+## Why it's different
 
-## Overview
+- **One line-up across servers.** Jellyfin, Emby and Plex content is merged into a
+  single catalog and can share a channel.
+- **Real broadcast model.** Channels are deterministic: a playlist anchored to a
+  start time, looping forever. Any client computes the same "now playing" with no
+  shared server state.
+- **Aesthetic-first TV UI.** A dark indigo theme with electric-violet/teal accents,
+  an EPG-style guide grid, and a cinematic channel-surf overlay.
 
-The SRE Architect Skill Pack provides a complete, modular SRE capability set for Claude Code. It includes two primary personas—**SRE Architect** (strategic) and **SRE Engineer** (tactical)—and specialized sub-skills for tools, SLOs, alerting, runbooks, debugging, performance, and remediation.
-
-Whether you're designing observability for a new service, defining SLOs, fixing alert fatigue, debugging incidents, tuning performance, or creating runbooks, this skill pack delivers comprehensive SRE guidance tailored to your needs.
-
----
-
-## Features
-
-- **Dual-persona model** - Strategic Architect for design/reviews, tactical Engineer for debugging/execution
-- **Principal-level SRE reasoning** - Get guidance grounded in real-world SRE practices
-- **Modular sub-skills** - Specialized capabilities for tools, SLOs, alerting, runbooks, debugging, performance, remediation, **chaos engineering**, and **postmortems**
-- **SLO-driven approach** - All recommendations tie back to service level objectives
-- **On-call friendly** - Designs for humans under stress, minimizing alert fatigue
-- **Intelligent routing** - Automatically directs requests to the appropriate skill
-- **Validated guidance** - Recommendations include testing strategies (synthetic, chaos, load)
-- **Hands-on execution** - Concrete commands and remediation actions
-
----
-
-## Architecture
+## Project layout
 
 ```
-┌───────────────────────────────────────────────────────────────────┐
-│                    SRE Architect Skill Pack                       │
-│                       (sre_architect_pack)                        │
-├───────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌─────────────┐  ┌─────────────────────────────────────────┐     │
-│  │  router.md  │→ │   Intent-based routing to appropriate   │     │
-│  └─────────────┘  │   primary skill (Architect or Engineer) │     │
-│                   └─────────────────────────────────────────┘     │
-│                                                                   │
-│  ┌──────────────┐ ┌─────────────────────────────────────────┐     │
-│  │ manifest.md  │→ │  Skill declarations & dependencies     │     │
-│  └──────────────┘ └─────────────────────────────────────────┘     │
-│                           │                                       │
-│        ┌──────────────────┴─────────────────┐                     │
-│        │                                    │                     │
-│  ┌─────▼──────────────────────────────┐  ┌──▼─────────────────┐   │
-│  │     sre_architect.md (Strategic)   │  │ sre_engineer.md    │   │
-│  │  • Observability design            │  │   (Tactical)       │   │
-│  │  • SLO/SLI definition              │  │  • Debugging       │   │
-│  │  • Alerting strategy               │  │  • Performance     │   │
-│  │  • Reliability reviews             │  │  • Remediation     │   │
-│  │  • Postmortem facilitation         │  │  • Runbook exec    │   │
-│  │  • Chaos strategy                  │  │                    │   │
-│  └─────┬──────────────────────────────┘  └──┬─────────────────┘   │
-│        │                                    │                     │
-│        └──────────────────┬─────────────────┘                     │
-│                           │                                       │
-│  ┌───────────┬─────────── ┴──────────┬───────────┬────────────┐   │
-│  │           │            │          │           │            │   │
-│┌─▼───┐ ┌─────▼────┐ ┌─────▼────┐ ┌───▼────┐ ┌────▼────┐ ┌─────▼─┐ │
-││Tools│ │   SLOs   │ │ Alerting │ │Runbooks│ │Postmort │ │ Chaos │ │
-││Cat  │ │Templates │ │Templates │ │Template│ │Templates│ │ Eng   │ │
-│└─────┘ └──────────┘ └──────────┘ └────────┘ └─────────┘ └───────┘ │
-│       ┌───────────┐                       ┌─────────────┐         │
-│       │   PRR     │                       │  Incident   │         │
-│       │ Checklist │                       │  Comms      │         │
-│       └───────────┘                       └─────────────┘         │
-│                                                   ┌───────────┐   │
-│                                                   │Debugging  │   │
-│                                                   │   Tools   │   │
-│                                                   └───────────┘   │
-│                                                   ┌───────────┐   │
-│                                                   │Performance│   │
-│                                                   │   Tools   │   │
-│                                                   └───────────┘   │
-│                                                   ┌───────────┐   │
-│                                                   │Remediation│   │
-│                                                   │  Actions  │   │
-│                                                   └───────────┘   │
-└───────────────────────────────────────────────────────────────────┘
+:engine   Pure-Kotlin (JVM) core — no Android dependencies, fully unit-tested
+          ├─ model/      MediaItem, MediaLibrary, ServerConfig, kinds
+          ├─ server/     MediaServerClient + Jellyfin/Emby + Plex (Ktor) + Fake
+          └─ channel/    ChannelScheduler, GuideBuilder, AutoChannelFactory
+:app      Android TV app — Jetpack Compose for TV + Media3 (ExoPlayer)
+          ├─ ui/theme    Design system (color, type, theme)
+          ├─ ui/guide    EPG guide grid
+          ├─ ui/player   Live player + channel surfing
+          └─ ui/setup    Add-a-server flow
 ```
 
----
+The heart of the product — the scheduling/guide engine — lives in `:engine` and is
+covered by unit tests (`ChannelSchedulerTest`, `MapperTest`). The Android layer is a
+thin, replaceable shell over it.
 
-## Components
+## Building
 
-| File | Purpose |
-|------|---------|
-| **manifest.md** | Declares all SRE skills and their dependencies |
-| **router.md** | Determines which skill handles which user intent |
-| **sre_architect.md** | Strategic SRE architect persona and workflows |
-| **sre_engineer.md** | Tactical SRE engineer persona and workflows |
-| **sre_tools_catalog.md** | Tooling recommendations across all SRE domains |
-| **sre_slo_templates.md** | SLO templates and error budget models |
-| **sre_alerting_templates.md** | Alerting templates and taxonomy |
-| **sre_runbook_templates.md** | Runbook skeletons for incidents |
-| **sre_postmortem_templates.md** | Blameless postmortem templates and facilitation |
-| **sre_chaos_engineering.md** | Chaos engineering workflows and experiments |
-| **sre_debugging_tools.md** | Debugging workflows, log analysis, trace queries |
-| **sre_performance_tools.md** | Profiling tools and tuning guidance |
-| **sre_remediation_actions.md** | Recovery procedures and remediation patterns |
-| **sre_production_readiness.md** | PRR checklists and templates |
-| **sre_incident_communication.md** | Stakeholder comms templates |
-
----
-
-## Installation
-
-### Global Installation (recommended)
-
-Clone this repository into your Claude Code skills directory:
+Requires Android Studio (Ladybug+) with the Android SDK and JDK 17.
 
 ```bash
-# Create the skills directory if it doesn't exist
-mkdir -p ~/.claude/skills
-
-# Clone this repository
-git clone [https://github.com/kryptophonik/claude-sre.git] ~/.claude/skills/sre_architect_pack
+./gradlew :engine:test        # run the engine unit tests (no SDK needed)
+./gradlew :app:assembleDebug  # build the Android TV APK
 ```
 
-### Project-Local Installation
+Then deploy to an Android TV device/emulator (API 23+) via Android Studio.
 
-For project-specific usage:
+## Connecting a server
 
-```bash
-# In your project directory
-mkdir -p .claude/skills
+In the app: **Add server** → pick Jellyfin / Emby / Plex → enter the server URL plus:
 
-# Copy or symlink the skill pack
-ln -s ~/.claude/skills/sre_architect_pack .claude/skills/
-```
+- **Jellyfin / Emby:** an API key and your user ID.
+- **Plex:** your `X-Plex-Token`.
 
-### Verify Installation
+UnifyTV imports the libraries, auto-generates channels (per-series binge channels and
+per-genre shuffle channels), and drops you into the guide. Before any server is
+connected a built-in demo line-up is shown so the UI is never empty.
 
-Start Claude Code and invoke the skill:
+## Status
 
-```
-> /skill sre_architect_pack
-```
-
----
-
-## Quick Start
-
-The SRE Architect Pack activates automatically when you use SRE-related keywords. Try these prompts:
-
-### Strategic Tasks (Architect)
-### Production Readiness
-```
-Run a production readiness review for our new payment gateway.
-```
-
-### Observability Design
-```
-Design observability for our API gateway service.
-```
-
-### SLO Creation
-```
-Help me define SLOs for our checkout service.
-```
-
-### Alerting Strategy
-```
-We're experiencing alert fatigue. Can you help redesign our alerts?
-```
-
-### Reliability Review
-```
-Review the reliability of our microservices architecture.
-```
-
-### Tactical Tasks (Engineer)
-### Incident Debugging & Comms
-```
-Help debug this incident. We're seeing high 5xx rates. Draft an initial announcement for Slack.
-```
-
-### Performance Issues
-```
-Our API is slow. Help me tune it.
-```
-
-### Remediation
-```
-How do I roll back the last deployment?
-```
-
-### Runbook Execution
-```
-Walk me through the runbook for database connection issues.
-```
-
-### Tooling
-```
-What tools should I use for metrics, logs, and traces in Kubernetes?
-```
-
-
----
-
-## Trigger Keywords
-
-The skill pack activates on these keywords:
-
-**Strategic (Architect):**
-- `sre`, `reliability`, `observability`, `incident`, `oncall`
-- `alerting`, `slo`, `runbook`, `error budget`
-
-**Tactical (Engineer):**
-- `debug`, `troubleshoot`, `diagnose`, `investigate`
-- `slow`, `latency`, `performance`, `bottleneck`
-- `fix`, `remediate`, `recover`, `rollback`, `restart`, `scale`
-
----
-
-## Core Behaviors
-
-All responses follow these principles:
-
-1. **User-impact first** - Focus on protecting user experience
-2. **SLO-driven** - Tie recommendations to SLIs/SLOs
-3. **Concrete steps** - Provide actionable guidance, not theory
-4. **On-call friendly** - Design for humans under stress
-5. **Validate everything** - Include testing strategies
-6. **State assumptions** - Call out missing context
-
----
+- `:engine` — implemented and unit-tested.
+- `:app` — implemented; build it in Android Studio (the UI module needs the Android
+  SDK + Google's Maven, so it isn't compiled in headless CI environments).
 
 ## License
 
-MIT License - see LICENSE file for details.
-
----
-
-## Contributing
-
-Contributions welcome! Please open an issue or submit a pull request.
-
----
-
-## Version
-
-1.2.0
+See [LICENSE](LICENSE).
